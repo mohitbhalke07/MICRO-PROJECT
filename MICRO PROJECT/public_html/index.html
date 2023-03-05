@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html lang="en">
+    <head>
+        <title>Student Enrollment Form</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet"
+              href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script
+        src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        
+        <script src="http://login2explore.com/jpdb/resources/js/0.0.3/jpdb-commons.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Student Enrollment Form</h1>
+            <form id="SeForm" method="get">
+                <div class="form-group">
+                    <span><label>Roll-No</label> <label>
+                        </label></span>
+                    <input type="text" class="form-control" id="rollno" placeholder="Enter Roll-No" onchange="getEmp()">
+                </div>
+
+                <div class="form-group">
+                    <span><label>Full Name</label> <label>
+                        </label></span>
+                    <input type="text" class="form-control" id="fullname" placeholder="Enter full name">
+                </div>
+
+                <div class="form-group">
+                    <span><label>Class</label> <label>
+                        </label></span>
+                    <input type="text" class="form-control" id="class" placeholder="Enter class">
+                </div>
+
+                <div class="form-group">
+                    <span><label>BirthDate</label> <label>
+                        </label></span>
+                    <input type="text" class="form-control" id="birthdate" placeholder="Enter birthdate">
+                </div>
+
+                <div class="form-group">
+                    <span><label>Address</label> <label>
+                        </label></span>
+                    <input type="text" class="form-control" id="address" placeholder="Enter address">
+                </div>
+
+                <div class="form-group">
+                    <span><label>Enrollment Date</label> <label>
+                        </label></span>
+                    <input type="text" class="form-control" id="enroldate" placeholder="Enter enrollment date">
+                </div>
+
+
+                <button type="button" class="btn btn-primary" id="Save" value="Save"
+                        onclick="save();" disabled> Save </button>
+
+                <button type="button" class="btn btn-primary" id="Update" value="Update"
+                       onclick="update();" disabled> Update </button>
+
+                <button type="button" class="btn btn-primary" id="Reset" value="Reset"
+                       onclick="reset();" disabled> Reset </button>
+            </form>
+        </div>
+        <script src="http://login2explore.com/jpdb/resources/js/0.0.3/jpdb-commons.js"></script>
+
+        <script>
+            $("#rollno").focus();
+            
+            function resetForm() {
+                $("#rollno").val("");
+                $("#fullname").val("");
+                $("#class").val("");
+                $("#birthdate").val("");
+                $("#address").val("");
+                $("#enroldate").val("");
+                
+                $("#rollno").prop("disabled", false);
+                $("#Save").prop("disabled", true);
+                $("#Update").prop("disabled", true);
+                $("#Reset").prop("disabled", true);
+                
+                $("#rollno").focus();
+            }
+            
+//            ==============================================================================================
+            function validateAndGetFormData() {
+                var rollno = $("#rollno").val();
+                if (rollno === "") {
+                    alert("roll_no Required Value");
+                    $("#rollno").focus();
+                    return "";
+                }
+
+                var fullname = $("#fullname").val();
+                if (fullname === "") {
+                    alert("fullname is Required Value");
+                    $("#fullname").focus();
+                    return "";
+                }
+
+                var Class = $("#class").val();
+                if (Class === "") {
+                    alert("Class is Required Value");
+                    $("#class").focus();
+                    return "";
+                }
+
+                var birthdate = $("#birthdate").val();
+                if (birthdate === "") {
+                    alert("birthdate is Required Value");
+                    $("#birthdate").focus();
+                    return "";
+                }
+
+                var address = $("#address").val();
+                if (address === "") {
+                    alert("address is Required Value");
+                    $("#address").focus();
+                    return "";
+                }
+
+                var enroldate = $("#enroldate").val();
+                if (enroldate === "") {
+                    alert("enrolldate is Required Value");
+                    $("#enroldate").focus();
+                    return "";
+                }
+
+                var jsonStrObj = {
+                    rollno: rollno,
+                    fullname: fullname,
+                    class: Class,
+                    bithddate: birthdate,
+                    address: address,
+                    enrolmdate: enroldate
+                };
+                return JSON.stringify(jsonStrObj);
+            }
+            
+            function createPUTRequest(connToken, jsonObj, dbName, relName) {
+                var putRequest = "{\n"
+                        + "\"token\" : \""
+                        + connToken
+                        + "\","
+                        + "\"dbName\": \""
+                        + dbName
+                        + "\",\n" + "\"cmd\" : \"PUT\",\n"
+                        + "\"rel\" : \""
+                        + relName + "\","
+                        + "\"jsonStr\": \n"
+                        + jsonObj
+                        + "\n"
+                        + "}";
+                return putRequest;
+            }
+            
+            function executeCommand(reqString, dbBaseUrl, apiEndPointUrl) {
+                var url = dbBaseUrl + apiEndPointUrl;
+                var jsonObj;
+                $.post(url, reqString, function (result) {
+                    jsonObj = JSON.parse(result);
+                }).fail(function (result) {
+                    var dataJsonObj = result.responseText;
+                    jsonObj = JSON.parse(dataJsonObj);
+                });
+                return jsonObj;
+            }
+            
+            
+            function save() {
+                var jsonStr = validateAndGetFormData();
+                if (jsonStr === "") {
+                    return;
+                }
+                var putReqStr = createPUTRequest("90932480|-31949274156970234|90949542",
+                        jsonStr, "SCHOOL-DB", "STUDENT-TABLE");
+                alert(putReqStr);
+                jQuery.ajaxSetup({async: false});
+                var resultObj = executeCommand(putReqStr,
+                        "http://api.login2explore.com:5577", "/api/iml");
+                alert(JSON.stringify(resultObj));
+                jQuery.ajaxSetup({async: true});
+                resetForm();
+            }
+
+//          ====================================================================================================
+            
+            function update() {
+                $("#Update").prop("disabled", true);
+                jsonChg = validateAndGetFormData();
+                var updateReqStr = createUPDATERecordRequest("90932480|-31949274156970234|90949542",
+                        jsonChg, "SCHOOL-DB", "STUDENT-TABLE", localStorage.getItem("recno"));
+//                alert(updateReqStr);
+                jQuery.ajaxSetup({async: false});
+                var resJsonObj = executeCommandAtGivenBaseUrl(updateReqStr,
+                        "http://api.login2explore.com:5577", "/api/iml");
+//                alert(JSON.stringify(resultObj));
+                jQuery.ajaxSetup({async: true});
+                resetForm();
+            }
+            
+            function getEmpIdAsJsonObj(){
+                var empid = $("#rollno").val();
+                var jsonStr = {
+                    rollno: empid
+                };
+                return JSON.stringify(jsonStr);
+            }
+            
+            function saveRecNo2lS(jsonObj){
+                var lvData = JSON.parse(jsonObj.data);
+                localStorage.setItem("recno", lvData.rec_no);
+            }
+            
+            function fillData(jsonObj){
+                saveRecNo2lS(jsonObj);
+                var record = JSON.parse(jsonObj.data).record; 
+                $("#fullname").val(record.fullname);
+                $("#class").val(record.class);
+                $("#birthdate").val(record.birthddate);
+                $("#address").val(record.address);
+                $("#enroldate").val(record.enrolmdate);
+                
+            }
+            
+            function getEmp(){
+                var empIdJsonObj = getEmpIdAsJsonObj();
+                var getRequest = createGET_BY_KEYRequest("90932480|-31949274156970234|90949542", "SCHOOL-DB", "STUDENT-TABLE", empIdJsonObj);
+                jQuery.ajaxSetup({async: false});
+                var resJsonObj = executeCommandAtGivenBaseUrl(getRequest, "http://api.login2explore.com:5577", "/api/iml");
+                jQuery.ajaxSetup({async: true});
+                if(resJsonObj.status === 400){
+                    $("#Save").prop("disabled", false);
+                    $("#Reset").prop("disabled", false);
+                    $("#fullname").focus();
+                }else if(resJsonObj.status === 200){
+                    $("#rollno").prop("disabled", true);
+                    fillData(resJsonObj);
+                    
+                    $("#Update").prop("disabled", false);
+                    $("#Reset").prop("disabled", false);
+                    $("#fullname").focus();
+                }
+            }
+            
+        </script>
+    </body>
+</html>
